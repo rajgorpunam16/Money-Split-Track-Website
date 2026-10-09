@@ -1,0 +1,255 @@
+html
+<div class="budgets-page">
+  <!-- Hero -->
+  <section class="budget-hero" data-aos="fade-down">
+    <div class="hero-content">
+      <span class="eyebrow">YOUR MONEY, YOUR PLAN</span>
+      <h1>Budget <span>Planner.</span></h1>
+      <p>Set your limits, track your spending, and stay in control of your money.</p>
+    </div>
+
+    <div class="hero-icon">🎯</div>
+  </section>
+
+  <!-- Period Filter and Add Button -->
+  <section class="budget-toolbar" data-aos="fade-up">
+    <div class="period-selector">
+      <button
+        type="button"
+        [class.active]="selectedPeriod === 'This month'"
+        (click)="setPeriod('This month')">
+        This month
+      </button>
+
+      <button
+        type="button"
+        [class.active]="selectedPeriod === 'Last month'"
+        (click)="setPeriod('Last month')">
+        Last month
+      </button>
+
+      <button
+        type="button"
+        [class.active]="selectedPeriod === 'This year'"
+        (click)="setPeriod('This year')">
+        This year
+      </button>
+
+      <button
+        type="button"
+        [class.active]="selectedPeriod === 'All time'"
+        (click)="setPeriod('All time')">
+        All time
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="add-budget-btn"
+      (click)="showBudgetForm = !showBudgetForm">
+      <span>{{ showBudgetForm ? '−' : '+' }}</span>
+      {{ showBudgetForm ? 'Cancel' : 'Create budget' }}
+    </button>
+  </section>
+
+  <!-- Message -->
+  <div
+    class="budget-message"
+    *ngIf="message"
+    role="status">
+    <span>{{ message }}</span>
+    <button type="button" aria-label="Dismiss message" (click)="message = ''">×</button>
+  </div>
+
+  <!-- Add Budget Form -->
+  <section class="budget-form-card" *ngIf="showBudgetForm" data-aos="fade-up">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">PLAN AHEAD</span>
+        <h2>Create a budget</h2>
+      </div>
+      <span class="form-icon">✦</span>
+    </div>
+
+    <form #budgetForm="ngForm" (ngSubmit)="addBudget(budgetForm)">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="budget-category">Category</label>
+          <select
+            id="budget-category"
+            name="category"
+            ngModel
+            required>
+            <option value="" disabled>Select category</option>
+            <option
+              *ngFor="let category of categories"
+              [value]="category"
+              [disabled]="budgets.some(budget => budget.category === category)">
+              {{ category }}
+              {{ budgets.some(budget => budget.category === category) ? '— already added' : '' }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="budget-limit">Monthly budget (₹)</label>
+          <input
+            id="budget-limit"
+            type="number"
+            name="limit"
+            ngModel
+            min="0.01"
+            step="0.01"
+            placeholder="e.g. 5000"
+            required />
+        </div>
+      </div>
+
+      <p class="form-hint">Choose a category and set the maximum amount you want to spend.</p>
+
+      <button class="submit-budget-btn" type="submit">
+        Save budget <span>→</span>
+      </button>
+    </form>
+  </section>
+
+  <!-- Overview -->
+  <section class="budget-overview" data-aos="fade-up">
+    <div class="overview-card overview-main">
+      <div class="overview-top">
+        <span class="overview-label">TOTAL BUDGET</span>
+        <span class="overview-icon">💰</span>
+      </div>
+      <h2>{{ formatCurrency(totalBudget) }}</h2>
+      <p>Across {{ budgets.length }} budget categories</p>
+    </div>
+
+    <div class="overview-card">
+      <div class="overview-top">
+        <span class="overview-label">TOTAL SPENT</span>
+        <span class="overview-icon">📊</span>
+      </div>
+      <h2>{{ formatCurrency(totalSpent) }}</h2>
+      <p>{{ selectedPeriod }} expenses</p>
+    </div>
+
+    <div class="overview-card">
+      <div class="overview-top">
+        <span class="overview-label">REMAINING</span>
+        <span class="overview-icon">{{ remainingBudget < 0 ? '⚠️' : '🌱' }}</span>
+      </div>
+      <h2 [class.negative]="remainingBudget < 0">
+        {{ formatCurrency(remainingBudget) }}
+      </h2>
+      <p>{{ remainingBudget < 0 ? 'You are over your total budget' : 'Available within your limits' }}</p>
+    </div>
+
+    <div class="overview-card">
+      <div class="overview-top">
+        <span class="overview-label">BUDGET HEALTH</span>
+        <span class="overview-icon">✨</span>
+      </div>
+      <h2>{{ overallUsage }}%</h2>
+      <p>{{ overBudgetCount }} categories over budget</p>
+      <div class="overall-progress">
+        <div
+          class="overall-progress-fill"
+          [style.width.%]="overallUsage > 100 ? 100 : overallUsage">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Budget List -->
+  <section class="budget-list-section" data-aos="fade-up">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">SPENDING LIMITS</span>
+        <h2>Your budgets</h2>
+        <p>Track how much you have spent in each category.</p>
+      </div>
+      <span class="category-count">{{ budgets.length }} categories</span>
+    </div>
+
+    <div class="budget-grid" *ngIf="budgetCards.length > 0; else noBudgets">
+      <article
+        class="budget-card"
+        *ngFor="let budget of budgetCards"
+        [class.over-budget]="budget.overBudget">
+
+        <div class="budget-card-top">
+          <div class="category-icon">{{ budget.icon }}</div>
+          <button
+            type="button"
+            class="delete-budget-btn"
+            (click)="deleteBudget(budget.id)"
+            [attr.aria-label]="'Delete ' + budget.category + ' budget'"
+            title="Delete budget">
+            ×
+          </button>
+        </div>
+
+        <div class="category-title-row">
+          <h3>{{ budget.category }}</h3>
+          <span class="budget-status" [class.status-warning]="budget.overBudget">
+            {{ budget.overBudget ? 'Over limit' : 'On track' }}
+          </span>
+        </div>
+
+        <div class="spent-amount">
+          <strong>{{ formatCurrency(budget.spent) }}</strong>
+          <span>spent</span>
+        </div>
+
+        <div class="budget-progress-track">
+          <div
+            class="budget-progress-fill"
+            [class.progress-warning]="budget.overBudget"
+            [style.width.%]="budget.percent">
+          </div>
+        </div>
+
+        <div class="budget-amount-row">
+          <span>{{ budget.percent }}% used</span>
+          <span>Limit {{ formatCurrency(budget.limit) }}</span>
+        </div>
+
+        <div class="budget-footer" [class.footer-warning]="budget.overBudget">
+          <span>{{ budget.overBudget ? 'Over by' : 'Remaining' }}</span>
+          <strong>{{ formatCurrency(budget.overBudget ? -budget.remaining : budget.remaining) }}</strong>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #noBudgets>
+      <div class="empty-budgets">
+        <span>🌿</span>
+        <h3>No budgets yet</h3>
+        <p>Create your first budget to start tracking your spending.</p>
+        <button type="button" class="add-budget-btn" (click)="showBudgetForm = true">
+          + Create your first budget
+        </button>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- Uncategorized Spending -->
+  <section class="uncategorized-card" *ngIf="uncategorizedSpending > 0" data-aos="fade-up">
+    <div class="uncategorized-icon">🧾</div>
+    <div>
+      <h3>Spending without a budget</h3>
+      <p>Some expenses belong to categories that don't have a budget yet.</p>
+    </div>
+    <strong>{{ formatCurrency(uncategorizedSpending) }}</strong>
+  </section>
+
+  <!-- Helpful Note -->
+  <section class="budget-tip" data-aos="fade-up">
+    <span class="tip-icon">💡</span>
+    <div>
+      <h3>A little money tip</h3>
+      <p>Your budget cards use expenses saved on the Personal page. Add or update your personal expenses there to keep your budget overview in sync.</p>
+    </div>
+  </section>
+</div>
+

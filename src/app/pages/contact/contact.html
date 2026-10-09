@@ -1,0 +1,298 @@
+<main class="contact-page">
+
+  <!-- HERO -->
+  <section class="contact-hero">
+    <div class="contact-hero-copy" data-aos="fade-right">
+      <span class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        WE'RE HERE TO HELP
+      </span>
+
+      <h1>
+        Let's make money management
+        <em>feel simpler.</em>
+      </h1>
+
+      <p>
+        Questions, feedback, or an idea to share?
+        We'd love to hear from you.
+      </p>
+
+      <div class="contact-trust">
+        <span class="trust-check">✓</span>
+        <span>Every good conversation starts somewhere.</span>
+      </div>
+
+      <a href="#contact-form" class="hero-scroll-link">
+        <span class="scroll-line"></span>
+        SEND US A MESSAGE
+        <span class="scroll-arrow">↓</span>
+      </a>
+    </div>
+
+    <div class="contact-hero-visual" data-aos="fade-left">
+      <div class="contact-hero-image">
+        <img
+          src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=85"
+          alt="A team collaborating around a table"
+          fetchpriority="high"
+        />
+      </div>
+
+      <div class="hero-caption">
+        <span class="caption-icon">✳</span>
+        <div>
+          <strong>Here for the little things.</strong>
+          <small>Every question matters.</small>
+        </div>
+      </div>
+
+      <span class="hero-orbit orbit-one"></span>
+      <span class="hero-orbit orbit-two"></span>
+    </div>
+  </section>
+
+  <!-- CONTACT INFORMATION + FORM -->
+  <section class="contact-layout" id="contact-form">
+
+    <!-- LEFT: CONTACT DETAILS -->
+    <aside class="contact-info" data-aos="fade-up">
+      <span class="eyebrow">GET IN TOUCH</span>
+
+      <h2>
+        We'd love to
+        <em>hear from you.</em>
+      </h2>
+
+      <p class="contact-description">
+        Have a question about your account, personal expenses, or shared
+        groups? Send us a message and let us know what's on your mind.
+      </p>
+
+      <div class="contact-details">
+
+        <div class="contact-method">
+          <span class="method-icon" aria-hidden="true">✉</span>
+
+          <div>
+            <small>EMAIL</small>
+            <strong>hello@splittrack.example</strong>
+            <p>Demo address — replace before publishing.</p>
+          </div>
+        </div>
+
+        <div class="contact-method">
+          <span class="method-icon" aria-hidden="true">◷</span>
+
+          <div>
+            <small>SUPPORT HOURS</small>
+            <strong>Monday – Friday</strong>
+            <p>Typical business hours; availability is not configured yet.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="contact-note">
+        <span class="note-icon" aria-hidden="true">✳</span>
+
+        <div>
+          <strong>A quick note</strong>
+          <p>
+            This is currently a demo contact form. Messages are validated
+            in your browser but aren't sent or saved.
+          </p>
+        </div>
+      </div>
+
+      <div class="contact-signoff">
+        <span class="signoff-line"></span>
+        <span>Let's make the money stuff easier.</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT: CONTACT FORM -->
+    <div
+      class="contact-form-card"
+      data-aos="fade-up"
+      data-aos-delay="100"
+    >
+      <div class="form-heading">
+        <div class="form-heading-top">
+          <span class="form-kicker">SEND A MESSAGE</span>
+          <span class="form-step">YOUR VOICE MATTERS</span>
+        </div>
+
+        <h2>What's on your mind?</h2>
+
+        <p>
+          Share a little detail below. We'll make the rest feel simple.
+        </p>
+      </div>
+
+      @if (submitted) {
+        <div class="success-message" role="status" aria-live="polite">
+          <span class="success-icon">✓</span>
+
+          <div>
+            <strong>Demo form completed</strong>
+            <p>
+              Your message passed validation, but it wasn't sent or saved.
+              Connect a backend to receive real contact messages.
+            </p>
+          </div>
+        </div>
+      }
+
+      <form
+        #contactForm="ngForm"
+        (ngSubmit)="submitContact(contactForm)"
+        novalidate
+      >
+        <div class="form-row">
+          <label>
+            <span class="field-label">Your name <span>*</span></span>
+
+            <input
+              type="text"
+              name="name"
+              ngModel
+              required
+              minlength="2"
+              autocomplete="name"
+              placeholder="e.g. Priya Sharma"
+              #nameField="ngModel"
+              [attr.aria-invalid]="
+                nameField.touched && nameField.invalid ? 'true' : null
+              "
+            />
+
+            @if (nameField.touched && nameField.invalid) {
+              <small class="field-error">
+                Please enter at least 2 characters.
+              </small>
+            }
+          </label>
+
+          <label>
+            <span class="field-label">Email address <span>*</span></span>
+
+            <input
+              type="email"
+              name="email"
+              ngModel
+              required
+              email
+              autocomplete="email"
+              placeholder="you@example.com"
+              #emailField="ngModel"
+              [attr.aria-invalid]="
+                emailField.touched && emailField.invalid ? 'true' : null
+              "
+            />
+
+            @if (emailField.touched && emailField.invalid) {
+              <small class="field-error">
+                Please enter a valid email address.
+              </small>
+            }
+          </label>
+        </div>
+
+        <label>
+          <span class="field-label">What can we help with? <span>*</span></span>
+
+          <select
+            name="topic"
+            ngModel
+            required
+            #topicField="ngModel"
+            [attr.aria-invalid]="
+              topicField.touched && topicField.invalid ? 'true' : null
+            "
+          >
+            <option value="" disabled>Select a topic</option>
+            <option value="personal">Personal expense tracking</option>
+            <option value="groups">Group expenses and settlements</option>
+            <option value="account">Account and login</option>
+            <option value="feedback">Feedback or suggestion</option>
+            <option value="other">Something else</option>
+          </select>
+
+          @if (topicField.touched && topicField.invalid) {
+            <small class="field-error">
+              Please select a topic.
+            </small>
+          }
+        </label>
+
+        <label>
+          <span class="field-label">Your message <span>*</span></span>
+
+          <textarea
+            name="message"
+            ngModel
+            required
+            minlength="10"
+            rows="5"
+            placeholder="Tell us a little more..."
+            #messageField="ngModel"
+            [attr.aria-invalid]="
+              messageField.touched && messageField.invalid ? 'true' : null
+            "
+          ></textarea>
+
+          @if (messageField.touched && messageField.invalid) {
+            <small class="field-error">
+              Please write at least 10 characters.
+            </small>
+          }
+        </label>
+
+        <button
+          type="submit"
+          class="send-button"
+          [class.button-disabled]="contactForm.invalid"
+        >
+          <span>Send message</span>
+          <span class="send-arrow">↗</span>
+        </button>
+
+        <p class="privacy-note">
+          <span aria-hidden="true">⌑</span>
+          Required fields are marked with *. Don't include passwords or
+          other sensitive information.
+        </p>
+      </form>
+    </div>
+
+  </section>
+
+  <!-- CLOSING SECTION -->
+  <section class="contact-bottom" data-aos="fade-up">
+    <span class="eyebrow">
+      <span class="eyebrow-dot"></span>
+      A LITTLE CLARITY GOES A LONG WAY
+    </span>
+
+    <h2>
+      Better conversations.
+      <em>Better money habits.</em>
+    </h2>
+
+    <p>
+      Because managing money should make room for living.
+    </p>
+
+    <a routerLink="/signup" class="bottom-cta">
+      Start your SplitTrack journey <span>↗</span>
+    </a>
+
+    <div class="bottom-decoration" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </section>
+
+</main>

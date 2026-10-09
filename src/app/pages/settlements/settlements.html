@@ -1,0 +1,145 @@
+
+<div class="settlements-page">
+  <section class="settlements-hero" data-aos="fade-up">
+    <div>
+      <span class="eyebrow">YOUR MONEY, SETTLED</span>
+      <h1>Settle up<span>.</span></h1>
+      <p>See who owes whom and keep every shared expense in balance.</p>
+    </div>
+    <div class="hero-icon">↗</div>
+  </section>
+
+  <section class="settlement-stats">
+    <article class="settlement-stat owe-card" data-aos="fade-up">
+      <span class="stat-icon">↙</span>
+      <p>You owe</p>
+      <h2>{{ formatCurrency(totalYouOwe) }}</h2>
+      <small>Payments you need to make</small>
+    </article>
+
+    <article class="settlement-stat owed-card" data-aos="fade-up" data-aos-delay="100">
+      <span class="stat-icon">↗</span>
+      <p>Owed to you</p>
+      <h2>{{ formatCurrency(totalOwedToYou) }}</h2>
+      <small>Money others owe you</small>
+    </article>
+
+    <article class="settlement-stat completed-card" data-aos="fade-up" data-aos-delay="200">
+      <span class="stat-icon">✓</span>
+      <p>Total settled</p>
+      <h2>{{ formatCurrency(totalSettled) }}</h2>
+      <small>Payments marked completed</small>
+    </article>
+  </section>
+
+  <section class="suggestions-section" data-aos="fade-up">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">SMART SUGGESTIONS</span>
+        <h2>Suggested payments</h2>
+        <p>Simple payment suggestions based on your group expenses.</p>
+      </div>
+      <span class="count-pill">{{ suggestions.length }} suggestions</span>
+    </div>
+
+    <div class="suggestion-list" *ngIf="suggestions.length > 0; else noSuggestions">
+      <article class="suggestion-card" *ngFor="let item of suggestions">
+        <div class="person-avatar">{{ item.from.charAt(0).toUpperCase() }}</div>
+
+        <div class="suggestion-details">
+          <h3>{{ item.from }} <span>pays</span> {{ item.to }}</h3>
+          <p>{{ item.groupName }}</p>
+        </div>
+
+        <div class="suggestion-action">
+          <strong>{{ formatCurrency(item.amount) }}</strong>
+          <button type="button" (click)="recordSettlement(item)">
+            Add payment
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #noSuggestions>
+      <div class="empty-state">
+        <div class="empty-icon">✓</div>
+        <h3>You're all balanced!</h3>
+        <p>There are no outstanding group balances to settle right now.</p>
+        <a routerLink="/groups">View your groups →</a>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="settlement-history" data-aos="fade-up">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">PAYMENT TRACKER</span>
+        <h2>Settlement history</h2>
+        <p>Track pending and completed payments in one place.</p>
+      </div>
+    </div>
+
+    <div class="settlement-toolbar">
+      <button type="button" [class.active]="filter === 'all'" (click)="setFilter('all')">
+        All <span>{{ settlements.length }}</span>
+      </button>
+      <button type="button" [class.active]="filter === 'pending'" (click)="setFilter('pending')">
+        Pending <span>{{ pendingSettlements.length }}</span>
+      </button>
+      <button type="button" [class.active]="filter === 'completed'" (click)="setFilter('completed')">
+        Completed <span>{{ completedSettlements.length }}</span>
+      </button>
+    </div>
+
+    <div class="history-list" *ngIf="filteredSettlements.length > 0; else emptyHistory">
+      <article class="history-card" *ngFor="let item of filteredSettlements">
+        <div class="history-icon" [class.is-complete]="item.settled">
+          {{ item.settled ? '✓' : '↗' }}
+        </div>
+
+        <div class="history-details">
+          <h3>{{ item.from }} <span>pays</span> {{ item.to }}</h3>
+          <p>{{ item.groupName }} · {{ item.createdAt | date:'dd MMM yyyy' }}</p>
+        </div>
+
+        <div class="history-amount">
+          <strong>{{ formatCurrency(item.amount) }}</strong>
+          <span [class.status-complete]="item.settled" class="status-label">
+            {{ item.settled ? 'Completed' : 'Pending' }}
+          </span>
+        </div>
+
+        <div class="history-actions">
+          <button
+            type="button"
+            class="settle-button"
+            *ngIf="!item.settled"
+            (click)="markAsSettled(item)">
+            Mark settled
+          </button>
+
+          <button
+            type="button"
+            class="delete-settlement"
+            (click)="deleteSettlement(item.id)"
+            aria-label="Delete settlement">
+            ×
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #emptyHistory>
+      <div class="empty-history">
+        <span>◎</span>
+        <h3>No payments here yet</h3>
+        <p>When you add a suggested payment, it will appear here.</p>
+      </div>
+    </ng-template>
+  </section>
+
+  <div class="settlement-toast" *ngIf="message">
+    <span>✓</span> {{ message }}
+    <button type="button" (click)="message = ''">×</button>
+  </div>
+</div>

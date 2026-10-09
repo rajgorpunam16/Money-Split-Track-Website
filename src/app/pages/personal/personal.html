@@ -1,0 +1,327 @@
+
+<div class="money-dashboard">
+  <header class="dashboard-heading" data-aos="fade-down">
+    <div>
+      <span class="eyebrow">YOUR FINANCIAL SPACE</span>
+      <h1>Personal <em>money</em> tracker.</h1>
+      <p>A clearer picture of your money starts here.</p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="showTransactionForm = !showTransactionForm"
+    >
+      <span>{{ showTransactionForm ? '×' : '+' }}</span>
+      {{ showTransactionForm ? 'Close form' : 'Add transaction' }}
+    </button>
+  </header>
+
+  @if (successMessage) {
+    <div class="dashboard-notice" role="status">{{ successMessage }}</div>
+  }
+
+  @if (showTransactionForm) {
+    <section class="transaction-form-card" data-aos="fade-down">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">RECORD YOUR MONEY</span>
+          <h2>New transaction</h2>
+        </div>
+      </div>
+
+      <form #transactionForm="ngForm" (ngSubmit)="addTransaction(transactionForm)">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="transactionTitle">Transaction name</label>
+            <input
+              id="transactionTitle"
+              name="title"
+              ngModel
+              required
+              minlength="2"
+              placeholder="e.g. Grocery shopping"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="transactionAmount">Amount (₹)</label>
+            <input
+              id="transactionAmount"
+              name="amount"
+              type="number"
+              ngModel
+              required
+              min="1"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="transactionType">Transaction type</label>
+            <select id="transactionType" name="type" ngModel required>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="transactionCategory">Category</label>
+            <select id="transactionCategory" name="category" ngModel required>
+              <option value="Food">Food & groceries</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills & utilities</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Salary">Salary</option>
+              <option value="Freelance">Freelance</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="transactionDate">Date</label>
+            <input
+              id="transactionDate"
+              name="date"
+              type="date"
+              ngModel
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="showTransactionForm = false"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="primary-button">Save transaction ↗</button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="balance-banner" data-aos="fade-up">
+    <div class="balance-decoration decoration-one"></div>
+    <div class="balance-decoration decoration-two"></div>
+
+    <div class="balance-copy">
+      <span class="balance-label">YOUR AVAILABLE BALANCE</span>
+      <h2>{{ formatCurrency(balance) }}</h2>
+      <p>Your income minus your recorded expenses.</p>
+      <div class="balance-badge">
+        <span>↗</span> {{ savingsRate }}% balance retained
+      </div>
+    </div>
+
+    <div class="balance-illustration" aria-hidden="true">
+      <div class="illustration-circle">
+        <span>₹</span>
+      </div>
+      <div class="illustration-coin coin-one">₹</div>
+      <div class="illustration-coin coin-two">✳</div>
+    </div>
+  </section>
+
+  <section class="summary-grid" data-aos="fade-up" data-aos-delay="100">
+    <article class="summary-card">
+      <div class="summary-top">
+        <span class="summary-icon income-icon">↗</span>
+        <span class="summary-caption">MONEY IN</span>
+      </div>
+      <h3>{{ formatCurrency(totalIncome) }}</h3>
+      <p>Total recorded income</p>
+      <div class="summary-progress">
+        <span class="income-progress" style="width: 76%"></span>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-top">
+        <span class="summary-icon expense-icon">↘</span>
+        <span class="summary-caption">MONEY OUT</span>
+      </div>
+      <h3>{{ formatCurrency(totalExpenses) }}</h3>
+      <p>Total recorded expenses</p>
+      <div class="summary-progress">
+        <span class="expense-progress" style="width: 42%"></span>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-top">
+        <span class="summary-icon savings-icon">✳</span>
+        <span class="summary-caption">SAVING RATE</span>
+      </div>
+      <h3>{{ savingsRate }}%</h3>
+      <p>Income remaining after expenses</p>
+      <div class="summary-progress">
+        <span class="savings-progress" [style.width.%]="Math.min(100, Math.max(0, savingsRate))"></span>
+      </div>
+    </article>
+  </section>
+
+  <section class="analytics-grid">
+    <article class="panel spending-panel" data-aos="fade-up">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">YOUR MONEY PATTERNS</span>
+          <h2>Income & expenses</h2>
+        </div>
+        <span class="period-label">Last 6 months</span>
+      </div>
+
+      <div class="chart-legend">
+        <span><i class="legend-dot legend-income"></i> Income</span>
+        <span><i class="legend-dot legend-expense"></i> Expenses</span>
+      </div>
+
+      <div class="bar-chart">
+        @for (item of spendingBars; track item.month) {
+          <div class="chart-column">
+            <div class="bar-pair">
+              <div
+                class="chart-bar income-bar"
+                [style.height.%]="Math.max(4, item.income / maxChartValue * 100)"
+                [title]="'Income: ' + formatCurrency(item.income)"
+              ></div>
+              <div
+                class="chart-bar expense-bar"
+                [style.height.%]="Math.max(4, item.expense / maxChartValue * 100)"
+                [title]="'Expenses: ' + formatCurrency(item.expense)"
+              ></div>
+            </div>
+            <span class="chart-month">{{ item.month }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="chart-footnote">
+        <span class="footnote-icon">✦</span>
+        <span>Your October figures update when you add or remove transactions. Earlier months are sample data.</span>
+      </div>
+    </article>
+
+    <article class="panel category-panel" data-aos="fade-up" data-aos-delay="100">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">WHERE IT GOES</span>
+          <h2>Spending categories</h2>
+        </div>
+      </div>
+
+      @if (categoryBreakdown.length > 0) {
+        <div class="category-list">
+          @for (item of categoryBreakdown; track item.name) {
+            <div class="category-item">
+              <div class="category-item-top">
+                <span>{{ item.name }}</span>
+                <strong>{{ formatCurrency(item.amount) }}</strong>
+              </div>
+              <div class="category-track">
+                <span [style.width.%]="item.percent"></span>
+              </div>
+              <small>{{ item.percent }}% of recorded expenses</small>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <span>✳</span>
+          <p>No expenses yet. Add a transaction to see your spending breakdown.</p>
+        </div>
+      }
+    </article>
+  </section>
+
+  <section class="panel transactions-panel" data-aos="fade-up">
+    <div class="section-heading transaction-heading">
+      <div>
+        <span class="eyebrow">YOUR LATEST ACTIVITY</span>
+        <h2>Recent transactions</h2>
+        <p class="section-subtitle">Every little detail adds up.</p>
+      </div>
+
+      <select
+        class="filter-select"
+        aria-label="Filter transactions"
+        [value]="selectedFilter"
+        (change)="selectedFilter = $any($event.target).value"
+      >
+        <option value="all">All transactions</option>
+        <option value="income">Income only</option>
+        <option value="expense">Expenses only</option>
+      </select>
+    </div>
+
+    <div class="transaction-table">
+      <div class="transaction-row table-head">
+        <span>TRANSACTION</span>
+        <span>CATEGORY</span>
+        <span>DATE</span>
+        <span>AMOUNT</span>
+        <span>ACTION</span>
+      </div>
+
+      @for (item of filteredTransactions; track item.id) {
+        <div class="transaction-row">
+          <div class="transaction-name">
+            <span
+              class="transaction-icon"
+              [class.income-icon]="item.type === 'income'"
+              [class.expense-icon]="item.type === 'expense'"
+            >{{ item.icon }}</span>
+            <span>
+              <strong>{{ item.title }}</strong>
+              <small>{{ item.type === 'income' ? 'Money received' : 'Money spent' }}</small>
+            </span>
+          </div>
+
+          <span class="transaction-category">{{ item.category }}</span>
+          <span class="transaction-date">{{ formatDate(item.date) }}</span>
+
+          <strong
+            class="transaction-amount"
+            [class.positive-amount]="item.type === 'income'"
+            [class.negative-amount]="item.type === 'expense'"
+          >
+            {{ item.type === 'income' ? '+' : '−' }}{{ formatCurrency(item.amount) }}
+          </strong>
+
+          <button
+            type="button"
+            class="delete-button"
+            aria-label="Delete transaction"
+            title="Delete transaction"
+            (click)="deleteTransaction(item.id)"
+          >×</button>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <span>✳</span>
+          <p>No transactions match this filter.</p>
+        </div>
+      }
+    </div>
+
+    <div class="transaction-footer">
+      <span>{{ filteredTransactions.length }} transactions displayed</span>
+      <span>Keep tracking, keep growing <b>✳</b></span>
+    </div>
+  </section>
+
+  <section class="dashboard-bottom" data-aos="fade-up">
+    <div>
+      <span class="eyebrow">A LITTLE REMINDER</span>
+      <h2>Progress, not perfection.</h2>
+      <p>Small money habits today can create more freedom tomorrow.</p>
+    </div>
+    <span class="bottom-flower">✳</span>
+  </section>
+</div>

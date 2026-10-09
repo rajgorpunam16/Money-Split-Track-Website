@@ -1,0 +1,355 @@
+// ---------- Variables ----------
+$forest-900: #0a1a0e;
+$forest-800: #0f2616;
+$forest-700: #143321;
+$mint-300: #c0ebb0;
+$mint-200: #d6f3cb;
+$cream-100: #f7faf3;
+
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$bp-mobile: 600px;
+$side-width: 300px;
+
+// ---------- Mixins ----------
+@mixin glass($bg-alpha: 0.72) {
+  background: rgba($forest-900, $bg-alpha);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba($mint-300, 0.18);
+}
+
+@mixin below($width) {
+  @media (max-width: $width) {
+    @content;
+  }
+}
+
+// ---------- Floating pill ----------
+// NOTE: the pill uses transform + backdrop-filter, which would trap any
+// position:fixed child. That's why the side menu and backdrop are siblings
+// of <header>, not children.
+.navbar {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 8px;
+
+  @include glass(0.72);
+  border-radius: 999px;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  animation: nav-float-in 0.7s $ease-out both;
+
+  @include below($bp-mobile) {
+    top: 12px;
+    padding: 6px;
+    gap: 2px;
+  }
+}
+
+@keyframes nav-float-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -24px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+// ---------- Main links (Home / About / Contact) ----------
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  a {
+    padding: 10px 18px;
+    border-radius: 999px;
+
+    color: $cream-100;
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+
+    &:hover {
+      background: rgba($mint-300, 0.14);
+      transform: translateY(-1px);
+    }
+
+    &.active {
+      background: $mint-300;
+      color: $forest-900;
+      font-weight: 600;
+    }
+
+    @include below($bp-mobile) {
+      padding: 9px 12px;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// ---------- Menu button (animated hamburger) ----------
+.menu-toggle {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: $mint-300;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+
+  .bar {
+    display: block;
+    width: 16px;
+    height: 2px;
+    border-radius: 2px;
+    background: $forest-900;
+    transition: transform 0.3s $ease-out, opacity 0.2s ease;
+  }
+
+  &:hover {
+    background: $mint-200;
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &.is-open {
+    .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .bar:nth-child(2) { opacity: 0; }
+    .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  }
+}
+
+// ---------- Backdrop ----------
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(3, 12, 6, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+// ---------- Side menu ----------
+.side-menu {
+  position: fixed;
+  top: 12px;
+  bottom: 12px;
+  left: 12px;
+  z-index: 1200;
+
+  display: flex;
+  flex-direction: column;
+  width: min($side-width, calc(100vw - 24px));
+  padding: 18px 14px;
+
+  background: linear-gradient(180deg, $forest-900 0%, $forest-700 100%);
+  border: 1px solid rgba($mint-300, 0.18);
+  border-radius: 28px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+
+  transform: translateX(calc(-100% - 24px));
+  visibility: hidden;
+  transition: transform 0.45s $ease-out, visibility 0.45s;
+
+  &.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+}
+
+.side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba($mint-300, 0.14);
+}
+
+.side-title {
+  color: $mint-300;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.close-btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba($mint-300, 0.12);
+  color: $cream-100;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background: rgba($mint-300, 0.25);
+    transform: rotate(90deg);
+  }
+}
+
+.side-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 16px;
+
+    color: $cream-100;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+
+    // staggered slide-in when the menu opens
+    opacity: 0;
+    transform: translateX(-16px);
+    transition: background 0.25s ease, color 0.25s ease, padding 0.25s ease;
+
+    &:hover {
+      background: rgba($mint-300, 0.12);
+      padding-left: 22px;
+    }
+
+    &.active {
+      background: $mint-300;
+      color: $forest-900;
+      font-weight: 600;
+
+      .nav-icon {
+        background: rgba($forest-900, 0.12);
+        color: $forest-900;
+      }
+    }
+  }
+}
+
+// ---------- Brand (bottom of side menu) ----------
+.side-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto; // pushes it to the bottom
+  padding: 16px 8px 4px;
+  border-top: 1px solid rgba($mint-300, 0.14);
+  text-decoration: none;
+
+  .brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: $mint-300;
+    color: $forest-900;
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: transform 0.3s $ease-out;
+  }
+
+  .brand-name {
+    color: $cream-100;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-highlight {
+    color: $mint-300;
+  }
+
+  &:hover .brand-icon {
+    transform: rotate(-8deg) scale(1.06);
+  }
+}
+
+.side-menu.open .side-links a {
+  animation: link-in 0.5s $ease-out forwards;
+
+  @for $i from 1 through 6 {
+    &:nth-child(#{$i}) {
+      animation-delay: 0.12s + ($i * 0.06s);
+    }
+  }
+}
+
+@keyframes link-in {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba($mint-300, 0.12);
+  color: $mint-300;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+// ---------- Reduced motion ----------
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .side-menu,
+  .backdrop,
+  .side-menu.open .side-links a {
+    animation: none;
+    transition: none;
+  }
+
+  .side-links a {
+    opacity: 1;
+    transform: none;
+  }
+}
