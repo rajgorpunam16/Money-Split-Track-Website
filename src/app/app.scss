@@ -1,0 +1,32 @@
+:host {
+display: block;
+min-height: 100vh;
+color: #203d2d;
+background: #f8faf5;
+font-family: 'DM Sans', Arial, sans-serif;
+}
+
+:host * {
+box-sizing: border-box;
+}
+
+.page-content {
+min-height: 55vh;
+}
+
+button,
+input,
+textarea,
+select {
+font: inherit;
+}
+
+button,
+a {
+-webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+color: #fff;
+background: #38754e;
+}

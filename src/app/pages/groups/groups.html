@@ -1,0 +1,503 @@
+<section class="groups-page">
+  <header class="groups-header" data-aos="fade-down">
+    <div>
+      <p class="eyebrow">SPLITTRACK / GROUP FINANCES</p>
+      <h1>Money is better <span>shared.</span></h1>
+      <p>Manage shared expenses, track balances, and keep everyone on the same page.</p>
+    </div>
+
+
+<button class="primary-btn" type="button" (click)="openAddGroup()">
+  + Create group
+</button>
+
+
+  </header>
+
+  <section class="group-stats" data-aos="fade-up">
+    <article class="dark-stat">
+      <span>Total group budget</span>
+      <h2>{{ formatCurrency(totalBudget) }}</h2>
+      <p>Across all your groups</p>
+    </article>
+
+
+<article class="group-stat-card">
+  <span>Your groups</span>
+  <h2>{{ groups.length }}</h2>
+  <p>Active groups</p>
+</article>
+
+<article class="group-stat-card">
+  <span>Total members</span>
+  <h2>{{ totalMembers }}</h2>
+  <p>Including you</p>
+</article>
+
+
+  </section>
+
+  <section class="groups-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">YOUR CIRCLES</p>
+        <h2>Group spaces</h2>
+      </div>
+      <span class="section-count">{{ groups.length }} groups</span>
+    </div>
+
+
+<div class="group-cards" *ngIf="groups.length; else emptyGroups">
+  <article
+    class="group-card"
+    *ngFor="let group of groups; trackBy: trackGroup"
+    data-aos="fade-up"
+  >
+    <div class="group-card-top">
+      <div class="group-icon">
+        {{ group.category === 'Trip' ? '✈' : group.category === 'Home' ? '⌂' : '◉' }}
+      </div>
+
+      <button
+        class="icon-btn delete-btn"
+        type="button"
+        (click)="deleteGroup(group.id)"
+        [attr.aria-label]="'Delete ' + group.name"
+        title="Delete group"
+      >×</button>
+    </div>
+
+    <span class="group-category">{{ group.category }}</span>
+    <h3>{{ group.name }}</h3>
+
+    <div class="member-list">
+      <span class="member-avatar" *ngFor="let member of group.members">
+        {{ member.charAt(0).toUpperCase() }}
+      </span>
+      <span class="member-total">{{ group.members.length }} members</span>
+    </div>
+
+    <div class="group-budget">
+      <span>Group budget</span>
+      <strong>{{ formatCurrency(group.budget) }}</strong>
+    </div>
+
+    <div class="group-card-actions">
+      <button
+        class="primary-btn"
+        type="button"
+        (click)="openAddExpense(group.id)"
+      >
+        + Add expense
+      </button>
+
+      <button
+        class="secondary-btn"
+        type="button"
+        (click)="selectedGroupId = group.id"
+      >
+        View details
+      </button>
+    </div>
+  </article>
+</div>
+
+<ng-template #emptyGroups>
+  <div class="empty-state">
+    <div class="empty-icon">＋</div>
+    <h3>No groups yet</h3>
+    <p>Create a group to start sharing expenses with friends or family.</p>
+    <button class="primary-btn" type="button" (click)="openAddGroup()">
+      Create your first group
+    </button>
+  </div>
+</ng-template>
+
+
+  </section>
+
+  <section class="group-details" *ngIf="selectedGroup as group" data-aos="fade-up">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">GROUP OVERVIEW</p>
+        <h2>{{ group.name }}</h2>
+        <p>Shared expenses and individual balances</p>
+      </div>
+
+
+  <button class="secondary-btn" type="button" (click)="selectedGroupId = null">
+    Close details
+  </button>
+</div>
+
+<div class="detail-stats">
+  <article class="detail-stat">
+    <span>Total expenses</span>
+    <h3>{{ formatCurrency(selectedGroupExpenseTotal) }}</h3>
+  </article>
+
+  <article class="detail-stat">
+    <span>Group budget</span>
+    <h3>{{ formatCurrency(group.budget) }}</h3>
+  </article>
+
+  <article class="detail-stat">
+    <span>Expense entries</span>
+    <h3>{{ selectedGroupExpenses.length }}</h3>
+  </article>
+</div>
+
+<div class="group-content-grid">
+  <section class="detail-panel">
+    <div class="panel-heading">
+      <div>
+        <h3>Expense history</h3>
+        <p>Every shared purchase, in one place</p>
+      </div>
+
+      <button class="primary-btn" type="button" (click)="openAddExpense(group.id)">
+        + Add
+      </button>
+    </div>
+
+    <div class="expense-list" *ngIf="selectedGroupExpenses.length; else emptyExpenses">
+      <article
+        class="expense-row"
+        *ngFor="let expense of selectedGroupExpenses; trackBy: trackExpense"
+      >
+        <div class="expense-icon">₹</div>
+
+        <div class="expense-info">
+          <h4>{{ expense.description }}</h4>
+          <p>Paid by {{ expense.paidBy }} · {{ expense.date }}</p>
+          <small>Split between {{ expense.splitAmong.join(', ') }}</small>
+        </div>
+
+        <div class="expense-amount">
+          <strong>{{ formatCurrency(expense.amount) }}</strong>
+          <button
+            class="text-delete"
+            type="button"
+            (click)="deleteExpense(expense.id)"
+          >
+            Delete
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #emptyExpenses>
+      <div class="empty-inline">
+        <p>No expenses recorded yet.</p>
+        <span>Add the first expense to calculate everyone's share.</span>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="detail-panel">
+    <div class="panel-heading">
+      <div>
+        <h3>Member balances</h3>
+        <p>Calculated from recorded expenses</p>
+      </div>
+    </div>
+
+    <div class="balance-list">
+      <article
+        class="balance-row"
+        *ngFor="let balance of selectedGroupBalances"
+      >
+        <div class="balance-avatar">
+          {{ balance.name.charAt(0).toUpperCase() }}
+        </div>
+
+        <div class="balance-info">
+          <strong>{{ balance.name }}</strong>
+          <small>
+            Paid {{ formatCurrency(balance.paid) }}
+            · Share {{ formatCurrency(balance.share) }}
+          </small>
+        </div>
+
+        <strong
+          class="balance-amount"
+          [class.positive]="balance.balance > 0.005"
+          [class.negative]="balance.balance < -0.005"
+        >
+          {{ balance.balance > 0.005 ? '+' : '' }}{{ formatCurrency(balance.balance) }}
+        </strong>
+      </article>
+    </div>
+
+    <p class="balance-note">
+      Positive means the member paid more than their share; negative means
+      they owe their share. These figures show net balances, not final
+      settlement transfers.
+    </p>
+  </section>
+</div>
+
+
+  </section>
+
+  <div class="modal-backdrop" *ngIf="showAddGroup" (click)="closeAddGroup()">
+    <section
+      class="group-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-group-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-heading">
+        <div>
+          <p class="eyebrow">NEW MONEY CIRCLE</p>
+          <h2 id="add-group-title">Create a group</h2>
+        </div>
+        <button class="icon-btn" type="button" (click)="closeAddGroup()">×</button>
+      </div>
+
+
+  <form (ngSubmit)="createGroup()">
+    <label for="groupName">Group name</label>
+    <input
+      id="groupName"
+      name="groupName"
+      [(ngModel)]="groupName"
+      placeholder="e.g. Goa holiday"
+      required
+    />
+
+    <label for="groupCategory">Category</label>
+    <select id="groupCategory" name="groupCategory" [(ngModel)]="groupCategory">
+      <option value="Trip">Trip</option>
+      <option value="Home">Home</option>
+      <option value="Friends">Friends</option>
+      <option value="Family">Family</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label for="memberNames">Members</label>
+    <input
+      id="memberNames"
+      name="memberNames"
+      [(ngModel)]="memberNames"
+      placeholder="Alex, Priya, Sam"
+      required
+    />
+    <small>Enter names separated by commas. You are added automatically.</small>
+
+    <label for="groupBudget">Group budget (₹)</label>
+    <input
+      id="groupBudget"
+      name="groupBudget"
+      type="number"
+      min="0"
+      [(ngModel)]="groupBudget"
+      placeholder="25000"
+      required
+    />
+
+    <p class="form-error" *ngIf="formError">{{ formError }}</p>
+
+    <div class="modal-actions">
+      <button class="secondary-btn" type="button" (click)="closeAddGroup()">
+        Cancel
+      </button>
+      <button class="primary-btn" type="submit">Create group</button>
+    </div>
+  </form>
+</section>
+
+
+  </div>
+
+ <div class="modal-backdrop" *ngIf="showAddExpense" (click)="closeAddExpense()">
+  <section
+    class="group-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="add-expense-title"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-heading">
+      <div>
+        <p class="eyebrow">SHARED SPENDING</p>
+        <h2 id="add-expense-title">Add an expense</h2>
+        <p *ngIf="selectedGroup">{{ selectedGroup.name }}</p>
+      </div>
+
+
+  <button class="icon-btn" type="button" (click)="closeAddExpense()">×</button>
+</div>
+
+<form (ngSubmit)="createExpense()">
+  <label for="expenseDescription">What was it for?</label>
+  <input
+    id="expenseDescription"
+    name="expenseDescription"
+    [(ngModel)]="expenseDescription"
+    placeholder="e.g. Dinner, groceries, hotel"
+    required
+  />
+
+  <label for="expenseAmount">Total amount (₹)</label>
+  <input
+    id="expenseAmount"
+    name="expenseAmount"
+    type="number"
+    min="0.01"
+    step="0.01"
+    [(ngModel)]="expenseAmount"
+    placeholder="1500"
+    required
+  />
+
+  <label for="expensePaidBy">Who paid?</label>
+  <select
+    id="expensePaidBy"
+    name="expensePaidBy"
+    [(ngModel)]="expensePaidBy"
+    required
+  >
+    <option *ngFor="let member of selectedGroup?.members" [value]="member">
+      {{ member }}
+    </option>
+  </select>
+
+  <label for="expenseDate">Expense date</label>
+  <input
+    id="expenseDate"
+    name="expenseDate"
+    type="date"
+    [(ngModel)]="expenseDate"
+    required
+  />
+
+  <fieldset class="split-members">
+    <legend>Who shares this expense?</legend>
+
+    <label class="split-member" *ngFor="let member of selectedGroup?.members">
+      <input
+        type="checkbox"
+        [checked]="expenseSplitAmong.includes(member)"
+        (change)="toggleSplitMember(member, $any($event.target).checked)"
+      />
+      <span>{{ member }}</span>
+    </label>
+  </fieldset>
+
+  <div class="split-mode-section">
+    <label>Choose split method</label>
+
+    <div class="split-mode-options">
+      <button
+        type="button"
+        class="split-mode-option"
+        [class.active]="splitMode === 'equal'"
+        [attr.aria-pressed]="splitMode === 'equal'"
+        (click)="changeSplitMode('equal')"
+      >
+        <span class="split-mode-icon">÷</span>
+        <span>
+          <strong>Equal split</strong>
+          <small>Share evenly</small>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="split-mode-option"
+        [class.active]="splitMode === 'custom'"
+        [attr.aria-pressed]="splitMode === 'custom'"
+        (click)="changeSplitMode('custom')"
+      >
+        <span class="split-mode-icon">₹</span>
+        <span>
+          <strong>Custom split</strong>
+          <small>Set each share</small>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="split-preview" *ngIf="splitMode === 'equal' && expenseAmount && expenseSplitAmong.length">
+    <span>Each person's share</span>
+    <strong>{{ formatCurrency(splitPreviewTotal) }}</strong>
+    <small>
+      {{ expenseSplitAmong.length }} selected member(s)
+    </small>
+  </div>
+
+  <div class="custom-split-section" *ngIf="splitMode === 'custom'">
+    <div class="custom-split-heading">
+      <div>
+        <h3>Custom amounts</h3>
+        <p>Enter how much each selected member owes.</p>
+      </div>
+      <span>{{ expenseSplitAmong.length }} selected</span>
+    </div>
+
+    <div class="custom-share-row" *ngFor="let member of selectedGroup?.members">
+      <ng-container *ngIf="expenseSplitAmong.includes(member)">
+        <div class="custom-share-member">
+          <span class="balance-avatar">{{ member.charAt(0).toUpperCase() }}</span>
+          <strong>{{ member }}</strong>
+        </div>
+
+        <div class="custom-share-input">
+          <span>₹</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            [name]="'customShare_' + member"
+            [ngModel]="expenseCustomShares[member] ?? 0"
+            (ngModelChange)="updateCustomShare(member, $event)"
+            [attr.aria-label]="'Share amount for ' + member"
+            required
+          />
+        </div>
+      </ng-container>
+    </div>
+
+    <div
+      class="custom-total-row"
+      [class.custom-total-valid]="expenseAmount !== null && expenseAmount > 0 && customSplitDifference === 0"
+      [class.custom-total-invalid]="expenseAmount !== null && expenseAmount > 0 && customSplitDifference !== 0"
+    >
+      <span>Assigned total</span>
+      <strong>{{ formatCurrency(customSplitTotal) }}</strong>
+    </div>
+
+    <div class="custom-total-row expected-total">
+      <span>Expense total</span>
+      <strong>{{ formatCurrency(expenseAmountValue) }}</strong>
+    </div>
+
+    <p class="split-validation-error"
+      *ngIf="expenseAmount !== null && expenseAmount > 0 && customSplitDifference !== 0">
+      Shares must equal the expense total. Difference:
+      {{ formatCurrency(customSplitDifference) }}.
+    </p>
+
+    <p class="split-validation-success"
+      *ngIf="expenseAmount !== null && expenseAmount > 0 && expenseSplitAmong.length > 0 && customSplitDifference === 0">
+      All shares add up correctly.
+    </p>
+  </div>
+
+  <p class="form-error" *ngIf="expenseError">{{ expenseError }}</p>
+
+  <div class="modal-actions">
+    <button class="secondary-btn" type="button" (click)="closeAddExpense()">
+      Cancel
+    </button>
+    <button class="primary-btn" type="submit">Save expense</button>
+  </div>
+</form>
+
+
+  </section>
+</div>
+
+</section>

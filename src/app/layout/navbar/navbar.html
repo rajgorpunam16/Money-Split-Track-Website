@@ -1,0 +1,88 @@
+<!-- Floating pill: menu button + Home / About / Contact -->
+<header class="navbar">
+  <button
+    class="menu-toggle"
+    type="button"
+    (click)="toggleMenu()"
+    [class.is-open]="menuOpen"
+    [attr.aria-expanded]="menuOpen"
+    aria-controls="side-menu"
+    aria-label="Open menu"
+  >
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </button>
+
+  <nav class="nav-links" aria-label="Main navigation">
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      (click)="closeMenu()"
+    >
+      Home
+    </a>
+
+    <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">
+      About
+    </a>
+
+    <a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">
+      Contact
+    </a>
+  </nav>
+</header>
+
+<!-- Dim overlay (sibling of header on purpose, see note in scss) -->
+<div class="backdrop" [class.show]="menuOpen" (click)="closeMenu()"></div>
+
+<!-- Slide-in side menu -->
+<aside
+  id="side-menu"
+  class="side-menu"
+  [class.open]="menuOpen"
+  [attr.aria-hidden]="!menuOpen"
+  role="dialog"
+  aria-label="Side menu"
+>
+  <div class="side-head">
+    <span class="side-title">Menu</span>
+    <button class="close-btn" type="button" (click)="closeMenu()" aria-label="Close menu">
+      ✕
+    </button>
+  </div>
+
+  <nav class="side-links" aria-label="App navigation">
+    <a routerLink="/personal" routerLinkActive="active" (click)="closeMenu()">
+      <span class="nav-icon">◉</span>
+      Personal
+    </a>
+
+    <a routerLink="/groups" routerLinkActive="active" (click)="closeMenu()">
+      <span class="nav-icon">♧</span>
+      Groups
+    </a>
+
+    <a routerLink="/budgets" routerLinkActive="active" (click)="closeMenu()">
+      <span class="nav-icon">▤</span>
+      Budgets
+    </a>
+
+    <a routerLink="/transactions" routerLinkActive="active" (click)="closeMenu()">
+      <span class="nav-icon">↕</span>
+      Transactions
+    </a>
+
+    <a routerLink="/settlements" routerLinkActive="active" (click)="closeMenu()">
+      <span class="nav-icon">⇄</span>
+      Settlements
+    </a>
+  </nav>
+
+  <!-- Brand at the bottom of the side menu -->
+  <a class="side-brand" routerLink="/" (click)="closeMenu()" aria-label="SplitTrack home">
+    <span class="brand-icon">S</span>
+    <span class="brand-name">Split<span class="brand-highlight">Track</span></span>
+  </a>
+</aside>

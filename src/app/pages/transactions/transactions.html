@@ -1,0 +1,339 @@
+html
+<div class="transactions-page">
+
+  <!-- Hero -->
+  <section class="transactions-hero" data-aos="fade-down">
+    <div class="hero-content">
+      <span class="eyebrow">EVERY RUPEE HAS A STORY</span>
+      <h1>Transaction <span>History.</span></h1>
+      <p>All your income and expenses in one place. Stay organized, stay in control.</p>
+    </div>
+
+    <div class="hero-icon">🧾</div>
+  </section>
+
+  <!-- Toolbar -->
+  <section class="transactions-toolbar" data-aos="fade-up">
+    <div>
+      <span class="eyebrow">YOUR FINANCIAL ACTIVITY</span>
+      <h2>All transactions</h2>
+      <p>Review and manage your money movements.</p>
+    </div>
+
+    <button
+      type="button"
+      class="add-transaction-btn"
+      (click)="showForm = !showForm">
+      <span>{{ showForm ? '−' : '+' }}</span>
+      {{ showForm ? 'Cancel' : 'Add transaction' }}
+    </button>
+  </section>
+
+  <!-- Message -->
+  <div class="transaction-message" *ngIf="message" role="status">
+    <span>{{ message }}</span>
+    <button type="button" aria-label="Dismiss message" (click)="message = ''">×</button>
+  </div>
+
+  <!-- Add Transaction Form -->
+  <section class="transaction-form-card" *ngIf="showForm" data-aos="fade-up">
+    <div class="form-heading">
+      <div>
+        <span class="eyebrow">RECORD YOUR MONEY</span>
+        <h2>New transaction</h2>
+      </div>
+      <span class="form-heading-icon">✦</span>
+    </div>
+
+    <form (ngSubmit)="addTransaction()" #transactionForm="ngForm">
+      <div class="transaction-type-selector">
+        <button
+          type="button"
+          [class.active-expense]="formData.type === 'expense'"
+          (click)="formData.type = 'expense'">
+          <span>↘</span> Expense
+        </button>
+
+        <button
+          type="button"
+          [class.active-income]="formData.type === 'income'"
+          (click)="formData.type = 'income'">
+          <span>↗</span> Income
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field form-field-wide">
+          <label for="transaction-title">Transaction name</label>
+          <input
+            id="transaction-title"
+            type="text"
+            name="title"
+            [(ngModel)]="formData.title"
+            placeholder="e.g. Grocery shopping"
+            maxlength="100"
+            required />
+        </div>
+
+        <div class="form-field">
+          <label for="transaction-amount">Amount (₹)</label>
+          <input
+            id="transaction-amount"
+            type="number"
+            name="amount"
+            [(ngModel)]="formData.amount"
+            placeholder="0.00"
+            min="0.01"
+            step="0.01"
+            required />
+        </div>
+
+        <div class="form-field">
+          <label for="transaction-category">Category</label>
+          <select
+            id="transaction-category"
+            name="category"
+            [(ngModel)]="formData.category"
+            required>
+            <option *ngFor="let category of categories" [value]="category">
+              {{ categoryIcons[category] }} {{ category }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="transaction-date">Date</label>
+          <input
+            id="transaction-date"
+            type="date"
+            name="date"
+            [(ngModel)]="formData.date"
+            required />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="cancel-form-btn"
+          (click)="resetForm(); showForm = false; message = ''">
+          Cancel
+        </button>
+
+        <button type="submit" class="save-transaction-btn">
+          Save transaction <span>→</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Summary Cards -->
+  <section class="transaction-summary" data-aos="fade-up">
+    <article class="summary-card income-card">
+      <div class="summary-top">
+        <span class="summary-label">TOTAL INCOME</span>
+        <span class="summary-icon">↗</span>
+      </div>
+      <h2>{{ formatCurrency(totalIncome) }}</h2>
+      <p>{{ incomeCount }} income transactions</p>
+    </article>
+
+    <article class="summary-card expense-card">
+      <div class="summary-top">
+        <span class="summary-label">TOTAL EXPENSES</span>
+        <span class="summary-icon">↘</span>
+      </div>
+      <h2>{{ formatCurrency(totalExpenses) }}</h2>
+      <p>{{ expenseCount }} expense transactions</p>
+    </article>
+
+    <article class="summary-card balance-card">
+      <div class="summary-top">
+        <span class="summary-label">NET BALANCE</span>
+        <span class="summary-icon">₹</span>
+      </div>
+      <h2 [class.negative-balance]="netBalance < 0">
+        {{ formatCurrency(netBalance) }}
+      </h2>
+      <p>{{ netBalance >= 0 ? 'Income minus expenses' : 'Expenses exceed income' }}</p>
+    </article>
+
+    <article class="summary-card count-card">
+      <div class="summary-top">
+        <span class="summary-label">TRANSACTIONS</span>
+        <span class="summary-icon">▤</span>
+      </div>
+      <h2>{{ transactionCount }}</h2>
+      <p>Matching your current filters</p>
+    </article>
+  </section>
+
+  <!-- Filters -->
+  <section class="transaction-filters" data-aos="fade-up">
+    <div class="filter-heading">
+      <div>
+        <h2>Find a transaction</h2>
+        <p>Search, filter, and find exactly what you need.</p>
+      </div>
+
+      <button type="button" class="clear-filters-btn" (click)="clearFilters()">
+        Clear filters
+      </button>
+    </div>
+
+    <div class="filter-grid">
+      <div class="search-field">
+        <span>⌕</span>
+        <input
+          type="search"
+          name="searchText"
+          [(ngModel)]="searchText"
+          placeholder="Search name or category..." />
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-period">Period</label>
+        <select id="filter-period" [(ngModel)]="selectedPeriod" name="selectedPeriod">
+          <option value="All time">All time</option>
+          <option value="This month">This month</option>
+          <option value="Last month">Last month</option>
+          <option value="This year">This year</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-type">Type</label>
+        <select id="filter-type" [(ngModel)]="selectedType" name="selectedType">
+          <option value="All">All types</option>
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-category">Category</label>
+        <select
+          id="filter-category"
+          [(ngModel)]="selectedCategory"
+          name="selectedCategory">
+          <option value="All">All categories</option>
+          <option *ngFor="let category of availableCategories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Transaction List -->
+  <section class="transaction-list-section" data-aos="fade-up">
+    <div class="list-heading">
+      <div>
+        <h2>Recent activity</h2>
+        <p>{{ filteredTransactions.length }} transaction(s) found</p>
+      </div>
+      <span class="activity-badge">● Live from your saved data</span>
+    </div>
+
+    <div class="transaction-list" *ngIf="filteredTransactions.length > 0; else noTransactions">
+      <article class="transaction-row" *ngFor="let transaction of filteredTransactions">
+        <div
+          class="transaction-category-icon"
+          [class.income-icon]="transaction.type === 'income'"
+          [class.expense-icon]="transaction.type === 'expense'">
+          {{ transaction.icon || categoryIcons[transaction.category] || '📦' }}
+        </div>
+
+        <div class="transaction-details">
+          <h3>{{ transaction.title }}</h3>
+          <div class="transaction-meta">
+            <span class="transaction-category">{{ transaction.category }}</span>
+            <span class="meta-dot">•</span>
+            <span>{{ formatDate(transaction.date) }}</span>
+          </div>
+        </div>
+
+        <div class="transaction-amount-area">
+          <strong
+            [class.income-amount]="transaction.type === 'income'"
+            [class.expense-amount]="transaction.type === 'expense'">
+            {{ transaction.type === 'income' ? '+' : '−' }}{{ formatCurrency(transaction.amount) }}
+          </strong>
+          <span
+            class="transaction-type-badge"
+            [class.income-badge]="transaction.type === 'income'"
+            [class.expense-badge]="transaction.type === 'expense'">
+            {{ transaction.type }}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          class="delete-transaction-btn"
+          [attr.aria-label]="'Delete transaction ' + transaction.title"
+          title="Delete transaction"
+          (click)="deleteTransaction(transaction.id)">
+          <span>×</span>
+        </button>
+      </article>
+    </div>
+
+    <ng-template #noTransactions>
+      <div class="empty-transactions">
+        <div class="empty-icon">🧾</div>
+        <h3>No transactions found</h3>
+        <p>
+          {{ searchText || selectedType !== 'All' || selectedCategory !== 'All' || selectedPeriod !== 'All time'
+            ? 'Try changing your search or filters.'
+            : 'Add your first transaction to start tracking your money.' }}
+        </p>
+
+        <button
+          *ngIf="searchText || selectedType !== 'All' || selectedCategory !== 'All' || selectedPeriod !== 'All time'"
+          type="button"
+          class="clear-filters-btn"
+          (click)="clearFilters()">
+          Clear filters
+        </button>
+
+        <button
+          *ngIf="!searchText && selectedType === 'All' && selectedCategory === 'All' && selectedPeriod === 'All time'"
+          type="button"
+          class="add-transaction-btn"
+          (click)="showForm = true">
+          + Add transaction
+        </button>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- Category Breakdown -->
+  <section class="category-breakdown-section" *ngIf="categoryBreakdown.length > 0" data-aos="fade-up">
+    <div class="breakdown-heading">
+      <span class="eyebrow">WHERE YOUR MONEY GOES</span>
+      <h2>Expense breakdown</h2>
+      <p>See which categories account for your spending under the current filters.</p>
+    </div>
+
+    <div class="breakdown-list">
+      <article class="breakdown-row" *ngFor="let item of categoryBreakdown">
+        <div class="breakdown-icon">{{ item.icon }}</div>
+
+        <div class="breakdown-info">
+          <div class="breakdown-label-row">
+            <strong>{{ item.category }}</strong>
+            <span>{{ formatCurrency(item.total) }}</span>
+          </div>
+
+          <div class="breakdown-track">
+            <div class="breakdown-fill" [style.width.%]="item.percent"></div>
+          </div>
+        </div>
+
+        <span class="breakdown-percent">{{ item.percent }}%</span>
+      </article>
+    </div>
+  </section>
+
+</div>
+
